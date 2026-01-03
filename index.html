@@ -52,6 +52,16 @@
     .hidden{display:none}
     footer{text-align:center;padding:15px;color:#666;margin-top:auto}
     @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    .waiting-message{
+      text-align:center;
+      padding:15px;
+      margin:15px 0;
+      background:#fff3cd;
+      color:#856404;
+      border-radius:8px;
+      border:1px solid #ffeaa7;
+      display:none;
+    }
   </style>
 </head>
 
@@ -86,6 +96,10 @@
     <i class="fab fa-facebook"></i> Share on Facebook
   </button>
 
+  <div id="waitingMessage" class="waiting-message">
+    <i class="fas fa-clock"></i> অনুগ্ৰহ কৰি Facebook-ত share কৰক আৰু ৩ ছেকেণ্ড অপেক্ষা কৰক...
+  </div>
+
   <div id="reward" class="reward-section hidden">
     <h2>🎉 অভিনন্দন!</h2>
     <p>আপুনি সফলভাবে কাম সম্পূৰ্ণ কৰিলে।</p>
@@ -101,33 +115,53 @@
 <footer>© 2023 Lucent GK Assamese</footer>
 
 <script>
-  let clickCount = 0;
   const fbName = document.getElementById("fbName");
   const shareBtn = document.getElementById("shareBtn");
   const reward = document.getElementById("reward");
+  const waitingMessage = document.getElementById("waitingMessage");
+  let hasShared = false;
 
   fbName.addEventListener("input", () => {
     shareBtn.disabled = fbName.value.trim().length < 3;
   });
 
   function shareFacebook(){
+    if(hasShared) return;
+    
     const postUrl = "https://www.facebook.com/share/p/1Ed8ZUeofG/";
-
-  window.open(
-    "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(postUrl),
-    "_blank"
+    
+    // Open Facebook share in new tab
+    const fbWindow = window.open(
+      "https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(postUrl),
+      "_blank"
     );
-
-    clickCount++;
-
-    setTimeout(()=>{
-      if(clickCount === 1){
-        alert("⚠️ We found some error, please share again");
-      }
-      if(clickCount === 2){
-        reward.classList.remove("hidden");
-      }
-    },1000);
+    
+    // Change button state
+    shareBtn.disabled = true;
+    shareBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    shareBtn.style.background = "linear-gradient(to right, #ff9800, #ff5722)";
+    
+    // Show waiting message
+    waitingMessage.style.display = "block";
+    
+    // Set flag
+    hasShared = true;
+    
+    // Wait 3 seconds before showing reward
+    setTimeout(() => {
+      // Change button to success state
+      shareBtn.innerHTML = '<i class="fab fa-facebook"></i> Shared Successfully';
+      shareBtn.style.background = "linear-gradient(to right, #4CAF50, #45a049)";
+      
+      // Hide waiting message
+      waitingMessage.style.display = "none";
+      
+      // Show reward section
+      reward.classList.remove("hidden");
+      
+      // Scroll to reward section smoothly
+      reward.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 3000); // 3 seconds delay
   }
 </script>
 
